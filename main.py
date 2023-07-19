@@ -9,6 +9,7 @@ from finbert.finbert import *
 from utils import *
 from scipy.special import softmax
 import logging
+
 logging.disable(logging.INFO)
 
 
@@ -48,7 +49,7 @@ def FinBERT_Sentiment(model, text):
     sentiment_score = df_sentiment['sentiment_score'].mean()
     val, count = np.unique(df_sentiment['prediction'], return_counts=True)
     idx = np.argmax(count)
-    sentiment_label = str(val[idx])
+    sentiment_label = str(val[idx]).title()
 
     return sentiment_score, sentiment_label
 
@@ -111,10 +112,48 @@ def RoBERTa_Sentiment(model, tokenizer, labels, text):
     positivity = positive_score / (negative_score + neutral_score + positive_score)
 
     sentiment_score = float((negativity * -1) + (neutrality * 0) + (positivity * 1))
-    sentiment_label = labels[np.argmax(scores)]
+    sentiment_label = labels[np.argmax(scores)].title()
 
     return sentiment_score, sentiment_label
 
+
+def init_Models():
+    FinBERT_model = FinBERT()
+    RoBERTa_model, RoBERTa_tokenizer, RoBERTa_labels = RoBERTa()
+
+    return FinBERT_model, RoBERTa_model, RoBERTa_tokenizer, RoBERTa_labels
+
+
+def sentiment(model, text):
+    '''
+
+    Use the FinBERT or RoBERTa models to evaluate the sentiment score and label of a given text.
+
+    :param model: [String]; Specify which model you want to use by using either "FinBERT" or "RoBERTa".
+    :param text: [String]; The text to analyse.
+    :return:
+    sentiment_score: [Float]; The sentiment score of the text.
+    sentiment_label: [String]; The sentiment label of the text. E.g., Negative / Neutral / Positive
+    '''
+
+    global FinBERT_model, RoBERTa_model, RoBERTa_tokenizer, RoBERTa_labels
+
+    if model == "FinBERT":
+        score, label = FinBERT_Sentiment(FinBERT_model, text)
+    if model == "RoBERTa":
+        score, label = RoBERTa_Sentiment(RoBERTa_model, RoBERTa_tokenizer, RoBERTa_labels, text)
+
+    return score, label
+
+def get_Articles():
+
+    path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_newsAPI'
+
+    df = pd.read_excel(r'{}\Absa.xlsx'.format(path), index_col=False, header=0)
+
+    print(df)
+
+    return None
 
 '''
 # ---------------------------------------------------------
@@ -123,12 +162,18 @@ def RoBERTa_Sentiment(model, tokenizer, labels, text):
 '''
 
 if __name__ == '__main__':
+
+    get_Articles()
+
+    '''
+    # Initialise models
+    FinBERT_model, RoBERTa_model, RoBERTa_tokenizer, RoBERTa_labels = init_Models()
+
     text = "This is truly horrible."
-    model, tokenizer, labels = RoBERTa()
-    score, label = RoBERTa_Sentiment(model, tokenizer, labels, text)
+    score, label = sentiment("RoBERTa", text)
     print(score, label)
 
     text = "M&T Bank beats profit estimates as higher rates boost interest income."
-    model = FinBERT()
-    score, label = FinBERT_Sentiment(model, text)
+    score, label = sentiment("FinBERT", text)
     print(score, label)
+    '''
