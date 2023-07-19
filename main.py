@@ -3,7 +3,7 @@
 # Import Libraries
 # ---------------------------------------------------------
 '''
-
+import pandas as pd
 from transformers import AutoModelForSequenceClassification
 from finbert.finbert import *
 from utils import *
@@ -145,15 +145,31 @@ def sentiment(model, text):
 
     return score, label
 
-def get_Articles():
 
-    path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_newsAPI'
+def fetch_Articles(write_path, df_news):
 
-    df = pd.read_excel(r'{}\Absa.xlsx'.format(path), index_col=False, header=0)
+    for i in range(len(df_news)):
+        print(df_news['URL'][i])
+        print(i)
 
-    print(df)
+        URL = df_news['URL'][i].replace('/', '_').replace('\\', '_').replace(':', '_')
+
+        file = r'{}.txt'.format(URL)
+        file_path = r'{}/{}'.format(write_path, file)
+
+        if os.path.exists(file_path) == False:
+            try:
+                with timeout(60, exception=RuntimeError):
+                    try:
+                        temp = get_full_content(df_news['URL'][i])
+                        print(temp)
+                    except RuntimeError:
+                        print('RuntimeError')
+            except urllib2.HTTPError:
+                print('HTTPError')
 
     return None
+
 
 '''
 # ---------------------------------------------------------
@@ -163,7 +179,12 @@ def get_Articles():
 
 if __name__ == '__main__':
 
-    get_Articles()
+    read_path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_newsAPI'
+    write_path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_articles'
+
+    df = pd.read_excel(r'{}\Capitec.xlsx'.format(read_path), index_col=False, header=0)
+
+    fetch_Articles(write_path, df)
 
     '''
     # Initialise models
