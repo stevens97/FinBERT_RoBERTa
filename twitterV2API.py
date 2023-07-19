@@ -29,7 +29,7 @@ def get_Tweets(bearer_token, query):
 
     :param bearer_token: [String]; Bearer token as purchased from the Twitter V2 API.
     :param query: [String]; Hashtag to look for. Please include hashtag as part of string. E.g., #EXAMPLE
-    :return:
+    :return: df_tweets [pandas DataFrame]; Dataframe containing the tweets and all meta-data.
     '''
 
     client = tweepy.Client(bearer_token=bearer_token)
