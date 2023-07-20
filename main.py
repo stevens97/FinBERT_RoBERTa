@@ -178,16 +178,11 @@ if __name__ == '__main__':
     # ---------------------------------------------------------
     # Analyse Financial News
     # ---------------------------------------------------------
-    read_path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_newsAPI'
-    write_path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_newsSentiment'
 
-    # CAPITEC BANK
-    df_news_capitec = pd.read_excel(r'{}\Capitec.xlsx'.format(read_path), index_col=False, header=0)
-    df_news_capitec = df_news_capitec
-    df_sentiment_capitec = news_Sentiment(df_news_capitec)
-    df_sentiment_capitec.to_excel(r'{}\df_sentiment_capitec.xlsx'.format(write_path))
-
+    # ...
+    
     # ---------------------------------------------------------
     # Analyse Twitter Data
     # ---------------------------------------------------------
 
+    # ...
