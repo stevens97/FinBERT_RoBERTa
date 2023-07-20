@@ -4,6 +4,7 @@
 # ---------------------------------------------------------
 '''
 
+import urllib
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
@@ -11,6 +12,42 @@ import re
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
+
+import time
+from threading import Thread
+
+
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+
+    def run(self):
+        print(type(self._target))
+        if self._target is not None:
+            self._return = self._target(*self._args,
+                                        **self._kwargs)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
+
+
+def call(f, *args, timeout=5, **kwargs):
+    i = 0
+    t = ThreadWithReturnValue(target=f, args=args, kwargs=kwargs)
+    t.daemon = True
+    t.start()
+    while True:
+        if not t.is_alive():
+            break
+        if timeout == i:
+            print("Connection Timeout")
+            return
+        time.sleep(1)
+        i += 1
+    return t.join()
 
 
 def get_full_content(URL):
@@ -24,22 +61,29 @@ def get_full_content(URL):
     :return: full_text [String]; Full text from the website.
     '''
 
-    html = urlopen(URL).read()
-    soup = BeautifulSoup(html, features="html.parser")
+    try:
+        html = urlopen(URL).read()
+        soup = BeautifulSoup(html, features="html.parser")
 
-    # kill all script and style elements
-    for script in soup(["script", "style"]):
-        script.extract()  # rip it out
+        # kill all script and style elements
+        for script in soup(["script", "style"]):
+            script.extract()  # rip it out
 
-    # get text
-    text = soup.get_text()
+        # get text
+        text = soup.get_text()
 
-    # break into lines and remove leading and trailing space on each
-    lines = (line.strip() for line in text.splitlines())
-    # break multi-headlines into a line each
-    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-    # drop blank lines
-    full_text = '\n'.join(chunk for chunk in chunks if chunk)
+        # break into lines and remove leading and trailing space on each
+        lines = (line.strip() for line in text.splitlines())
+        # break multi-headlines into a line each
+        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+        # drop blank lines
+        full_text = '\n'.join(chunk for chunk in chunks if chunk)
+    except urllib.error.HTTPError:
+        print('HTTPError')
+        full_text = None
+    except urllib.error.URLError:
+        print('URLError')
+        full_text = None
 
     return full_text
 

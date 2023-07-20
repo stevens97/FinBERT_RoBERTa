@@ -3,6 +3,7 @@
 # Import Libraries
 # ---------------------------------------------------------
 '''
+import urllib
 import pandas as pd
 from transformers import AutoModelForSequenceClassification
 from finbert.finbert import *
@@ -145,30 +146,20 @@ def sentiment(model, text):
 
     return score, label
 
+def news_Sentiment(df_news):
+    '''
 
-def fetch_Articles(write_path, df_news):
+    :param df_news:
+    :return:
+    '''
 
-    for i in range(len(df_news)):
-        print(df_news['URL'][i])
-        print(i)
+    df_sentiment = df_news.copy()
 
-        URL = df_news['URL'][i].replace('/', '_').replace('\\', '_').replace(':', '_')
+    df_sentiment['sentiment'] = [sentiment("FinBERT", str(x)) for x in df_news['Content']]
+    df_sentiment['score'] = [float(x[0]) for x in df_sentiment['sentiment']]
+    df_sentiment['label'] = [str(x[1]) for x in df_sentiment['sentiment']]
 
-        file = r'{}.txt'.format(URL)
-        file_path = r'{}/{}'.format(write_path, file)
-
-        if os.path.exists(file_path) == False:
-            try:
-                with timeout(60, exception=RuntimeError):
-                    try:
-                        temp = get_full_content(df_news['URL'][i])
-                        print(temp)
-                    except RuntimeError:
-                        print('RuntimeError')
-            except urllib2.HTTPError:
-                print('HTTPError')
-
-    return None
+    return df_sentiment
 
 
 '''
@@ -179,22 +170,24 @@ def fetch_Articles(write_path, df_news):
 
 if __name__ == '__main__':
 
-    read_path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_newsAPI'
-    write_path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_articles'
-
-    df = pd.read_excel(r'{}\Capitec.xlsx'.format(read_path), index_col=False, header=0)
-
-    fetch_Articles(write_path, df)
-
-    '''
-    # Initialise models
+    # ---------------------------------------------------------
+    # Initialise Models
+    # ---------------------------------------------------------
     FinBERT_model, RoBERTa_model, RoBERTa_tokenizer, RoBERTa_labels = init_Models()
 
-    text = "This is truly horrible."
-    score, label = sentiment("RoBERTa", text)
-    print(score, label)
+    # ---------------------------------------------------------
+    # Analyse Financial News
+    # ---------------------------------------------------------
+    read_path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_newsAPI'
+    write_path = r'C:\Users\cstevens\Desktop\Sentiment\_data\_newsSentiment'
 
-    text = "M&T Bank beats profit estimates as higher rates boost interest income."
-    score, label = sentiment("FinBERT", text)
-    print(score, label)
-    '''
+    # CAPITEC BANK
+    df_news_capitec = pd.read_excel(r'{}\Capitec.xlsx'.format(read_path), index_col=False, header=0)
+    df_news_capitec = df_news_capitec
+    df_sentiment_capitec = news_Sentiment(df_news_capitec)
+    df_sentiment_capitec.to_excel(r'{}\df_sentiment_capitec.xlsx'.format(write_path))
+
+    # ---------------------------------------------------------
+    # Analyse Twitter Data
+    # ---------------------------------------------------------
+
