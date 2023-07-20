@@ -1,8 +1,8 @@
-# Sentiment_Analysis
+# FinBERT_RoBERTa_Sentiment
 
 Sentiment Analysis of Financial News & Social Media Feeds, using FinBERT and RoBERTa models respectively.
 
-Conda Environment:
+# Conda Environment:
 Name                    Version                   Build  Channel
 _tflow_select             2.3.0                       mkl
 
