@@ -3,9 +3,7 @@
 Sentiment Analysis of Financial News & Social Media Feeds, using FinBERT and RoBERTa models respectively.
 
 Conda Environment:
-# packages in environment at C:\Users\cstevens\Anaconda3\envs\py310:
-#
-# Name                    Version                   Build  Channel
+Name                    Version                   Build  Channel
 _tflow_select             2.3.0                       mkl
 
 abseil-cpp                20211102.0           hd77b12b_0
