@@ -176,9 +176,9 @@ def news_Sentiment(df_news):
 
     df_sentiment = df_news.copy()
 
-    df_sentiment['sentiment'] = [sentiment("FinBERT", str(x)) for x in tqdm(df_sentiment['Content'])]
-    df_sentiment['score'] = [float(x[0]) for x in df_sentiment['sentiment']]
-    df_sentiment['label'] = [str(x[1]) for x in df_sentiment['sentiment']]
+    df_sentiment['Sentiment'] = [sentiment("FinBERT", str(x)) for x in tqdm(df_sentiment['Content'])]
+    df_sentiment['Score'] = [float(x[0]) for x in df_sentiment['Sentiment']]
+    df_sentiment['Label'] = [str(x[1]) for x in df_sentiment['Sentiment']]
 
     return df_sentiment
 
@@ -194,9 +194,9 @@ def twitter_Sentiment(df_tweets):
 
     df_sentiment = df_tweets.copy()
 
-    df_sentiment['sentiment'] = [sentiment("RoBERTa", str(x)) for x in tqdm(df_sentiment['text'])]
-    df_sentiment['score'] = [float(x[0]) for x in df_sentiment['sentiment']]
-    df_sentiment['label'] = [str(x[1]) for x in df_sentiment['sentiment']]
+    df_sentiment['Sentiment'] = [sentiment("RoBERTa", str(x)) for x in tqdm(df_sentiment['text'])]
+    df_sentiment['Score'] = [float(x[0]) for x in df_sentiment['Sentiment']]
+    df_sentiment['Label'] = [str(x[1]) for x in df_sentiment['Sentiment']]
 
     # Remove sensitive information from DataFrame.
     df_sentiment['Cleaned Text'] = [' '.join([x if '@' not in x else '...' for x in df_sentiment['text'][i].split(' ')])
@@ -207,18 +207,24 @@ def twitter_Sentiment(df_tweets):
     df_sentiment['Hashtags'] = hashtags
 
     # Profanity Filter
-    print('Cleaning for profanity...')
+    print('\nCleaning for profanity...\n')
     df_sentiment['Profanity Score'] = [profanity_Score(x) for x in tqdm(df_sentiment['Cleaned Text'])]
     profanity = np.array([df_sentiment['Profanity Score'] >= 0.5], dtype=bool)
     # Phishing Filter
-    print('Cleaning for spam/phishing attempts...')
-    phishing = [str(x) in ['www', '.com', 'http', 'https'] for x in tqdm(df_sentiment['Cleaned Text'])]
-    mask = (not profanity) and (not phishing)
+    print('\nCleaning for spam/phishing attempts...\n')
+    phishing = np.array([str(x) in ['www', '.com', 'http', 'https'] for x in tqdm(df_sentiment['Cleaned Text'])],
+                        dtype=bool)
+    mask = np.array((np.logical_not(profanity)) & (np.logical_not(phishing)), dtype=bool)[0]
+    print(mask)
+    # Filter: Not Profanity & Not Phishing
     df_sentiment = df_sentiment[mask].reset_index(drop=True)
 
-    df_sentiment.rename(columns={'text': 'Text', 'created_at': 'Publication Date'})
-    df_sentiment = df_sentiment[
-        ['Publication Date', 'Sentiment', 'Sentiment Data', 'Sentiment Score', 'Cleaned Text', 'Hashtags']].reset_index(
+    print(df_sentiment.columns)
+    df_sentiment = df_sentiment.rename(columns={'text': 'Text', 'created_at': 'Publication Date'})
+
+    print(df_sentiment.columns)
+    df_sentiment = df_sentiment[[
+        'Cleaned Text', 'Publication Date', 'Hashtags', 'Sentiment', 'Score', 'Label']].reset_index(
         drop=True)
 
     return df_sentiment
@@ -383,7 +389,7 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
             # Analyse Tweets
             print('\n\nAnalysing sentiment of Tweets...\n\n')
             df_tweets_sentiment = twitter_Sentiment(df_tweets)
-            df_tweets.to_excel(r'{}\{}_sentiment.xlsx'.format(path_tweet_sentiment, twitterAPI_query))
+            df_tweets_sentiment.to_excel(r'{}\{}_sentiment.xlsx'.format(path_tweet_sentiment, twitterAPI_query))
             print('{}_sentiment.xlsx saved to folder: {}'.format(twitterAPI_query, path_tweet_sentiment))
         else:
             print('No Tweets to analyse.')
@@ -407,7 +413,7 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
                 sys.exit(0)
 
             try:
-                df_news = pd.read_excel(r'{}\{}'.format(path_news, files[idx]))
+                df_news = pd.read_excel(r'{}\{}'.format(path_news, files[idx]), index_col=False)
                 print('\n\nImporting NLP models...\n\n')
                 # Initialise Model
                 FinBERT_model = init_Models('FinBERT')
@@ -443,7 +449,8 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
                 sys.exit(0)
 
             try:
-                df_tweets = pd.read_excel(r'{}\{}'.format(path_tweets, files[idx]))
+                df_tweets = pd.read_excel(r'{}\{}'.format(path_tweets, files[idx]), index_col=False)
+                df_tweets = df_tweets[0:3]
                 print('\n\nImporting NLP models...\n\n')
                 # Initialise Model
                 RoBERTa_model, RoBERTa_tokenizer, RoBERTa_labels = init_Models('RoBERTa')
@@ -451,7 +458,7 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
                 # Analyse Tweets
                 print('\n\nAnalysing sentiment for Tweets...\n\n')
                 df_tweets_sentiment = twitter_Sentiment(df_tweets)
-                df_tweets.to_excel(r'{}\{}_sentiment.xlsx'.format(path_tweet_sentiment, files[idx].split('.')[0]))
+                df_tweets_sentiment.to_excel(r'{}\{}_sentiment.xlsx'.format(path_tweet_sentiment, files[idx].split('.')[0]))
                 print('{}_sentiment.xlsx saved to folder: {}'.format(files[idx].split('.')[0], path_tweet_sentiment))
             except IndexError:
                 print('Invalid input / Invalid index selected.')
