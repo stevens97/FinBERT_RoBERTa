@@ -26,6 +26,10 @@ def profanity_Score(text):
 
     Returns the worst score to filter for profanity.
 
+    Original Model: https://huggingface.co/unitary/toxic-bert
+    Original Source Code: https://github.com/unitaryai/detoxify
+    Original Papers: https://arxiv.org/abs/1703.04009; https://arxiv.org/abs/1905.12516
+
     :param text: [String]; Text to analyse.
     :return: Worst score.
     '''

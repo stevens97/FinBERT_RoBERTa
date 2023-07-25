@@ -207,10 +207,12 @@ def twitter_Sentiment(df_tweets):
     df_sentiment['Hashtags'] = hashtags
 
     # Profanity Filter
-    df_sentiment['Profanity Score'] = [profanity_Score(x) for x in df_sentiment['Cleaned Text']]
+    print('Cleaning for profanity...')
+    df_sentiment['Profanity Score'] = [profanity_Score(x) for x in tqdm(df_sentiment['Cleaned Text'])]
     profanity = np.array([df_sentiment['Profanity Score'] >= 0.5], dtype=bool)
     # Phishing Filter
-    phishing = [str(x) in ['www', '.com', 'http', 'https'] for x in df_sentiment['Cleaned Text']]
+    print('Cleaning for spam/phishing attempts...')
+    phishing = [str(x) in ['www', '.com', 'http', 'https'] for x in tqdm(df_sentiment['Cleaned Text'])]
     mask = (not profanity) and (not phishing)
     df_sentiment = df_sentiment[mask].reset_index(drop=True)
 
