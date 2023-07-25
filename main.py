@@ -450,7 +450,6 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
 
             try:
                 df_tweets = pd.read_excel(r'{}\{}'.format(path_tweets, files[idx]), index_col=False)
-                df_tweets = df_tweets[0:3]
                 print('\n\nImporting NLP models...\n\n')
                 # Initialise Model
                 RoBERTa_model, RoBERTa_tokenizer, RoBERTa_labels = init_Models('RoBERTa')
