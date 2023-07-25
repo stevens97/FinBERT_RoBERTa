@@ -14,6 +14,7 @@ from finbert.finbert import *
 from utils import *
 from scipy.special import softmax
 import logging
+
 logging.disable(logging.INFO)
 from newsAPI import get_News
 from twitterV2API import get_Tweets

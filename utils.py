@@ -33,6 +33,13 @@ def profanity_Score(text):
 
 
 def list_files(dir_path):
+    '''
+
+    List files stord in directory.
+
+    :param dir_path: [String]; Filepath / directory.
+    :return: res: [String array]; List of all files.
+    '''
     # list to store files
     res = []
     try:
@@ -165,8 +172,15 @@ def call(f, *args, timeout=5, **kwargs):
 
 
 def fetch_Articles(write_path, df_news):
+    '''
+
+    Scrape all URLs in a given dataframe, as originally obtained from the News API.
+
+    :param write_path: [String]; Directory to save the files in.
+    :param df_news: [pandas DataFrame]; Dataframe as obtained with the News API
+    :return: None;
+    '''
     for i in range(len(df_news)):
-        temp = None
         print(df_news['URL'][i])
         print(i)
 
@@ -177,7 +191,6 @@ def fetch_Articles(write_path, df_news):
 
         if os.path.exists(file_path) == False:
             temp = call(get_full_content, timeout=10, URL=df_news['URL'][i])
-
             print(temp)
 
     return None
