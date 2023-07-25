@@ -1,0 +1,5 @@
+name: news
+channels:
+  - defaults
+  - conda-forge
+prefix: C:\Users\cstevens\Anaconda3\envs\news
