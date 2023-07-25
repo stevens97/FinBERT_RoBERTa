@@ -4,88 +4,48 @@
 # ---------------------------------------------------------
 '''
 
+import os
 import urllib
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-
+import numpy as np
 import re
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-
 import time
 from threading import Thread
+from detoxify import Detoxify
 
 
-class ThreadWithReturnValue(Thread):
-    def __init__(self, group=None, target=None, name=None,
-                 args=(), kwargs={}, Verbose=None):
-        Thread.__init__(self, group, target, name, args, kwargs)
-        self._return = None
-
-    def run(self):
-        print(type(self._target))
-        if self._target is not None:
-            self._return = self._target(*self._args,
-                                        **self._kwargs)
-
-    def join(self, *args):
-        Thread.join(self, *args)
-        return self._return
-
-
-def call(f, *args, timeout=5, **kwargs):
-    i = 0
-    t = ThreadWithReturnValue(target=f, args=args, kwargs=kwargs)
-    t.daemon = True
-    t.start()
-    while True:
-        if not t.is_alive():
-            break
-        if timeout == i:
-            print("Connection Timeout")
-            return
-        time.sleep(1)
-        i += 1
-    return t.join()
-
-
-def get_full_content(URL):
+def profanity_Score(text):
     '''
 
-    Scrape full-text from website given its URL.
+    Calculates the profanity score (profanity / obscenity / hate speech) for a given text.
+    Assigns a score between 0 and 1 for each category.
 
-    NOTE: Always be careful when scraping content from websites and be sure not to violate any privacy rights.
+    Returns the worst score to filter for profanity.
 
-    :param URL: [String]; URL of the website.
-    :return: full_text [String]; Full text from the website.
+    :param text: [String]; Text to analyse.
+    :return: Worst score.
     '''
+    return float(np.array(list(Detoxify('original').predict(text).values())).max())
 
+
+def list_files(dir_path):
+    # list to store files
+    res = []
     try:
-        html = urlopen(URL).read()
-        soup = BeautifulSoup(html, features="html.parser")
-
-        # kill all script and style elements
-        for script in soup(["script", "style"]):
-            script.extract()  # rip it out
-
-        # get text
-        text = soup.get_text()
-
-        # break into lines and remove leading and trailing space on each
-        lines = (line.strip() for line in text.splitlines())
-        # break multi-headlines into a line each
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        # drop blank lines
-        full_text = '\n'.join(chunk for chunk in chunks if chunk)
-    except urllib.error.HTTPError:
-        print('HTTPError')
-        full_text = None
-    except urllib.error.URLError:
-        print('URLError')
-        full_text = None
-
-    return full_text
+        for file_path in os.listdir(dir_path):
+            if os.path.isfile(os.path.join(dir_path, file_path)):
+                res.append(file_path)
+    except FileNotFoundError:
+        print(f"The directory {dir_path} does not exist")
+    except PermissionError:
+        print(f"Permission denied to access the directory {dir_path}")
+    except OSError as e:
+        print(f"An OS error occurred: {e}")
+    return res
 
 
 def preprocess_text(text):
@@ -131,3 +91,93 @@ def preprocess_text(text):
     processed_text = ' '.join(tokens)
 
     return processed_text
+
+
+def get_full_content(URL):
+    '''
+
+    Scrape full-text from website given its URL.
+
+    NOTE: Always be careful when scraping content from websites and be sure not to violate any privacy rights.
+
+    :param URL: [String]; URL of the website.
+    :return: full_text [String]; Full text from the website.
+    '''
+
+    try:
+        html = urlopen(URL).read()
+        soup = BeautifulSoup(html, features="html.parser")
+
+        # kill all script and style elements
+        for script in soup(["script", "style"]):
+            script.extract()  # rip it out
+
+        # get text
+        text = soup.get_text()
+
+        # break into lines and remove leading and trailing space on each
+        lines = (line.strip() for line in text.splitlines())
+        # break multi-headlines into a line each
+        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+        # drop blank lines
+        full_text = '\n'.join(chunk for chunk in chunks if chunk)
+    except urllib.error.HTTPError:
+        print('HTTPError')
+        full_text = None
+    except urllib.error.URLError:
+        print('URLError')
+        full_text = None
+
+    return full_text
+
+
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+
+    def run(self):
+        print(type(self._target))
+        if self._target is not None:
+            self._return = self._target(*self._args,
+                                        **self._kwargs)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
+
+
+def call(f, *args, timeout=5, **kwargs):
+    i = 0
+    t = ThreadWithReturnValue(target=f, args=args, kwargs=kwargs)
+    t.daemon = True
+    t.start()
+    while True:
+        if not t.is_alive():
+            break
+        if timeout == i:
+            print("Connection Timeout")
+            return
+        time.sleep(1)
+        i += 1
+    return t.join()
+
+
+def fetch_Articles(write_path, df_news):
+    for i in range(len(df_news)):
+        temp = None
+        print(df_news['URL'][i])
+        print(i)
+
+        URL = df_news['URL'][i].replace('/', '_').replace('\\', '_').replace(':', '_')
+
+        file = r'{}.txt'.format(URL)
+        file_path = r'{}/{}'.format(write_path, file)
+
+        if os.path.exists(file_path) == False:
+            temp = call(get_full_content, timeout=10, URL=df_news['URL'][i])
+
+            print(temp)
+
+    return None
