@@ -328,7 +328,8 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
         if api_key != '':
             try:
                 df_news = get_News(api_key, newsAPI_query, start_date, end_date, searchIn="title")
-                df_news.to_excel(r'{}\{}.xlsx'.format(path_news, newsAPI_query))
+                df_news.to_excel(r'{}\{}.xlsx'.format(path_news, newsAPI_query), index=False,
+                                 header=True)
                 print('{}.xlsx saved to folder: {}'.format(newsAPI_query, path_news))
             except KeyError:
                 print('Could not find any News Articles. Invalid API Key or Invalid Query.')
@@ -369,7 +370,8 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
             # Analyse News
             print('\n\nAnalysing sentiment of News articles...\n\n')
             df_news_sentiment = news_Sentiment(df_news)
-            df_news_sentiment.to_excel(r'{}\{}_sentiment.xlsx'.format(path_news_sentiment, newsAPI_query))
+            df_news_sentiment.to_excel(r'{}\{}_sentiment.xlsx'.format(path_news_sentiment, newsAPI_query), index=False,
+                                       header=True)
             print('{}_sentiment.xlsx saved to folder: {}'.format(newsAPI_query, path_news_sentiment))
         else:
             print('No News articles to analyse.')
@@ -389,21 +391,23 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
             # Analyse Tweets
             print('\n\nAnalysing sentiment of Tweets...\n\n')
             df_tweets_sentiment = twitter_Sentiment(df_tweets)
-            df_tweets_sentiment.to_excel(r'{}\{}_sentiment.xlsx'.format(path_tweet_sentiment, twitterAPI_query))
+            df_tweets_sentiment.to_excel(r'{}\{}_sentiment.xlsx'.format(path_tweet_sentiment, twitterAPI_query),
+                                         index=False, header=True)
             print('{}_sentiment.xlsx saved to folder: {}'.format(twitterAPI_query, path_tweet_sentiment))
         else:
             print('No Tweets to analyse.')
             df_tweets_sentiment = None
 
     # ---------------------------------------------------------
-    # Sentiment Analysis on Existing News Dataset
+    # Sentiment Analysis on Existing News API Dataset
     # ---------------------------------------------------------
 
     if (setting == 6):
         files = list_files(path_news)
         if len(files) > 0:
             print('The currently saved News API datasets are: ')
-            print(files)
+            for i in range(len(files)):
+                print('{}: {}'.format(i, files[i]))
 
             try:
                 idx = int(input("Please select the index of the file you want to perform Sentiment Analysis on."
@@ -422,7 +426,8 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
                 print('\n\nAnalysing sentiment for News articles...\n\n')
                 df_news_sentiment = news_Sentiment(df_news)
                 df_news_sentiment.to_excel(
-                    r'{}\{}_sentiment.xlsx'.format(path_news_sentiment, files[idx].split('.')[0]))
+                    r'{}\{}_sentiment.xlsx'.format(path_news_sentiment, files[idx].split('.')[0]), index=False,
+                    header=True)
                 print('{}_sentiment.xlsx saved to folder: {}'.format(files[idx].split('.')[0], path_news_sentiment))
             except IndexError:
                 print('Invalid input / Invalid index selected.')
@@ -432,14 +437,15 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
             print('There are currently no saved News API datasets in {}.'.format(path_news))
 
     # ---------------------------------------------------------
-    # Sentiment Analysis on Existing Tweet Dataset
+    # Sentiment Analysis on Existing Twitter V2 API Dataset
     # ---------------------------------------------------------
 
     if (setting == 7):
         files = list_files(path_tweets)
         if len(files) > 0:
             print('The currently saved Twitter V2 API datasets are: ')
-            print(files)
+            for i in range(len(files)):
+                print('{}: {}'.format(i, files[i]))
 
             try:
                 idx = int(input("Please select the index of the file you want to perform Sentiment Analysis on."
@@ -457,7 +463,9 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
                 # Analyse Tweets
                 print('\n\nAnalysing sentiment for Tweets...\n\n')
                 df_tweets_sentiment = twitter_Sentiment(df_tweets)
-                df_tweets_sentiment.to_excel(r'{}\{}_sentiment.xlsx'.format(path_tweet_sentiment, files[idx].split('.')[0]))
+                df_tweets_sentiment.to_excel(
+                    r'{}\{}_sentiment.xlsx'.format(path_tweet_sentiment, files[idx].split('.')[0]), index=False,
+                    header=True)
                 print('{}_sentiment.xlsx saved to folder: {}'.format(files[idx].split('.')[0], path_tweet_sentiment))
             except IndexError:
                 print('Invalid input / Invalid index selected.')
