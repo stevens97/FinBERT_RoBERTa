@@ -14,7 +14,6 @@ from finbert.finbert import *
 from utils import *
 from scipy.special import softmax
 import logging
-
 logging.disable(logging.INFO)
 from newsAPI import get_News
 from twitterV2API import get_Tweets
@@ -66,7 +65,7 @@ def FinBERT_Sentiment(model, text):
 def RoBERTa():
     '''
 
-    Create a pre-trained RoBERTa (A Robustly Optimized BERT Pretraining Approach) model
+    Create a pre-trained RoBERTa (A Robustly Optimized BERT Pre-training Approach) model
     for sentiment analysis.
 
     Documentation:
@@ -180,6 +179,18 @@ def news_Sentiment(df_news):
     df_sentiment['Score'] = [float(x[0]) for x in df_sentiment['Sentiment']]
     df_sentiment['Label'] = [str(x[1]) for x in df_sentiment['Sentiment']]
 
+    print('Finding top words...')
+    df_sentiment['Top Words'] = [top_Words(x, 5) for x in tqdm(df_sentiment['Content'])]
+
+    print('Finding standout articles...')
+    sigma = np.abs(np.std(df_sentiment['Score']))
+    avg = np.abs(np.mean(df_sentiment['Score']))
+    k = [False] * len(df_sentiment)
+    df_sentiment['Standout'] = k
+    df_sentiment.loc[np.abs(df_sentiment.Score) >= avg + 1 * sigma, 'Standout'] = True
+
+    print('Done.')
+
     return df_sentiment
 
 
@@ -226,6 +237,16 @@ def twitter_Sentiment(df_tweets):
     df_sentiment = df_sentiment[[
         'Cleaned Text', 'Publication Date', 'Hashtags', 'Sentiment', 'Score', 'Label']].reset_index(
         drop=True)
+
+    print('Finding top words...')
+    df_sentiment['Top Words'] = [top_Words(x, 5) for x in tqdm(df_sentiment['Content'])]
+
+    print('Finding standout articles...')
+    sigma = np.abs(np.std(df_sentiment['Score']))
+    avg = np.abs(np.mean(df_sentiment['Score']))
+    k = [False] * len(df_sentiment)
+    df_sentiment['Standout'] = k
+    df_sentiment.loc[np.abs(df_sentiment.Score) >= avg + 1 * sigma, 'Standout'] = True
 
     return df_sentiment
 

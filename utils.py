@@ -9,13 +9,44 @@ import urllib
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import numpy as np
+import pandas as pd
 import re
+import nltk
 from nltk.corpus import stopwords
+from nltk.corpus import words
 from nltk.tokenize import word_tokenize
+from nltk.tokenize import RegexpTokenizer
 from nltk.stem import WordNetLemmatizer
 import time
 from threading import Thread
 from detoxify import Detoxify
+from collections import Counter
+
+
+def top_Words(text, n):
+    '''
+    Top word counter: Returns the top n recurring English words from a given text.
+
+    :param text: [String]; The given text.
+    :param n: [Integer]; Specifies the number "n". The number of words to return.
+    :return: top [String]; Top n words.
+    '''
+    # Count most frequently occuring words
+    text = preprocess_text(text)
+    arr = text.split()
+    found = Counter(arr)
+    most_occur = found.most_common(n)
+    df = pd.DataFrame(np.array(most_occur).tolist())
+    df = df.rename(columns={df.columns[0]: "Word", df.columns[1]: "Count"})
+    top = ', '.join(np.array(df['Word'], dtype=str))
+
+    # Remove Non-English words
+    english = set(nltk.corpus.words.words())
+    top = top.split(',')
+    top = [word for word in top if word not in english]
+    top = ', '.join(top)
+
+    return top
 
 
 def profanity_Score(text):
@@ -91,9 +122,12 @@ def preprocess_text(text):
         return cleaned_text
 
     # Tokenize the text
-    tokens = word_tokenize(text.lower())
+    tokenizer = RegexpTokenizer(r'\w+')
+    tokens = tokenizer.tokenize(text.lower())
     # Remove stop words
     filtered_tokens = [token for token in tokens if token not in stopwords.words('english')]
+    # Remove non-english words
+    filtered_tokens = [token for token in filtered_tokens if token not in words.words() or not token.isalpha()]
     # Lemmatize the tokens
     lemmatizer = WordNetLemmatizer()
     lemmatized_tokens = [lemmatizer.lemmatize(token) for token in filtered_tokens]

@@ -4,7 +4,6 @@
 # ---------------------------------------------------------
 '''
 
-
 import pandas as pd
 import requests
 
@@ -16,6 +15,36 @@ Full documentation here: https://newsapi.org/docs/endpoints/everything
 Get API Key Here: https://newsapi.org/
 # ---------------------------------------------------------
 '''
+
+
+def get_Recent_News(api_key, query, date):
+    # Make API request
+    url = 'https://newsapi.org/v2/everything?q={}&from={}&sortBy=popularity&apiKey={}'.format(query, date, api_key)
+    response = requests.get(url)
+
+    # Get articles
+    articles = response.json()['articles']
+
+    # Create DataFrame
+    df_articles = pd.DataFrame(articles, columns=['title', 'description', 'content', 'url', 'publishedAt', 'source'])
+
+    # Extract source id and name
+    df_articles['source_id'] = df_articles['source'].apply(lambda x: x['id'] if x['id'] != None else '')
+    df_articles['source_name'] = df_articles['source'].apply(lambda x: x['name'] if x['name'] != None else '')
+
+    # Remove source column
+    df_articles.drop('source', axis=1, inplace=True)
+
+    # Print DataFrame
+    df_articles.head()
+
+    # Reformat DataFrame
+    df_articles = df_articles.rename(
+        columns={'title': 'Headline', 'description': 'Description', 'content': 'Content', 'url': 'URL',
+                 'publishedAt': 'Publication Date', 'source_id': 'sourceID', 'source_name': 'Source'})
+    df_articles = df_articles[['Headline', 'Description', 'Content', 'URL', 'Publication Date', 'Source']]
+
+    return df_articles
 
 
 def get_News(api_key, query, start_date, end_date, searchIn="title"):
