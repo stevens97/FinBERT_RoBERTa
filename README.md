@@ -1,4 +1,4 @@
-# FinBERT_RoBERTa_Sentiment
+# FinBERT_RoBERTa
 
 Sentiment Analysis of Financial News & Social Media Feeds, using FinBERT and RoBERTa models respectively.
 
