@@ -278,15 +278,15 @@ __)(-/)////)(-/)/  (  |/)(/((/_) /_)
     start_date = ''  # Please use format: "YYYY-MM-DD".
     end_date = ''  # Please use format: "YYYY-MM-DD".
     # Where to store the news data, change if need be
-    path_news = r'C:\Users\cstevens\OneDrive - BDO South Africa\Desktop\Sentiment\_data\_newsAPI'
-    path_news_sentiment = r'C:\Users\cstevens\OneDrive - BDO South Africa\Desktop\Sentiment\_data\_newsSentiment'
+    path_news = ''
+    path_news_sentiment = ''
 
     # Twitter API details
     bearer_token = ''
     twitterAPI_query = ''  # Please use format: #Query
     # Where to store the twitter data, change if need be
-    path_tweets = r'C:\Users\cstevens\OneDrive - BDO South Africa\Desktop\Sentiment\_data\_twitterAPI'
-    path_tweet_sentiment = r'C:\Users\cstevens\OneDrive - BDO South Africa\Desktop\Sentiment\_data\_twitterSentiment'
+    path_tweets = ''
+    path_tweet_sentiment = ''
 
     # ---------------------------------------------------------
     # Confirm User Input
