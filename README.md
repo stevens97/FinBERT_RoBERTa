@@ -1,6 +1,7 @@
 # FinBERT_RoBERTa
 
 Sentiment Analysis of Financial News & Social Media Feeds, using FinBERT and RoBERTa models.
+(A proof of concept).
 
 # Conda Environment: (Python 3.9.13)
 
